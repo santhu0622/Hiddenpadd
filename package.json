@@ -1,0 +1,12 @@
+{
+  "name": "hidden-pad",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HIDDEN PAD - Minimal dark-mode code editor utility",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build"
+  }
+}
