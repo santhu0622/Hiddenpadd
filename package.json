@@ -8,5 +8,12 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "build": "npm run install:all && cd frontend && npm run build"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.9.1",
+    "serverless-http": "^4.0.0"
   }
 }
