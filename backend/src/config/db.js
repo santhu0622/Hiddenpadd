@@ -15,11 +15,15 @@ class FallbackStore {
   }
 
   ensureDataDir() {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    if (!fs.existsSync(DATA_FILE)) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify({}), 'utf8');
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      if (!fs.existsSync(DATA_FILE)) {
+        fs.writeFileSync(DATA_FILE, JSON.stringify({}), 'utf8');
+      }
+    } catch (err) {
+      console.warn('Could not create data dir, fallback store might be read-only:', err.message);
     }
   }
 
@@ -37,7 +41,7 @@ class FallbackStore {
     try {
       fs.writeFileSync(DATA_FILE, JSON.stringify(this.data, null, 2), 'utf8');
     } catch (err) {
-      console.error('Error saving fallback JSON store:', err);
+      console.warn('Error saving fallback JSON store (might be read-only env):', err.message);
     }
   }
 
