@@ -3,126 +3,178 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HIDDEN PAD</title>
+  <title>STICKY PAD</title>
+  <meta name="description" content="Minimal dark-mode code and text pad utility" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Roboto+Mono:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!--
+    Space Mono  → STICKY PAD title only (distinctive display mono)
+    JetBrains Mono → all UI controls, buttons, inputs, textareas
+  -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * {
+    /* ── Reset ─────────────────────────────────── */
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
+    /* ── Base ──────────────────────────────────── */
     body {
       background-color: #111111;
       color: #dddddd;
-      font-family: 'Fira Code', 'JetBrains Mono', 'Roboto Mono', 'Source Code Pro', Consolas, monospace;
+      /* JetBrains Mono for all UI text */
+      font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
     }
+
     ::selection {
       background-color: #2a2a2a;
       color: #ffffff;
     }
-    /* Sleek custom scrollbars */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #111111;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #2a2a2a;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3a3a3a;
-    }
+
+    /* ── Scrollbars ────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #111111; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #383838; }
+
+    /* ── Title (Space Mono only) ───────────────── */
     .hp-title {
-      font-size: 22px;
+      font-family: 'Space Mono', monospace;
       font-weight: 700;
-      letter-spacing: 3px;
+      font-size: 22px;
+      letter-spacing: 4px;
       color: #eeeeee;
       text-transform: uppercase;
     }
+    .hp-title--sm {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: 4px;
+      color: #eeeeee;
+      text-transform: uppercase;
+    }
+
+    /* ── Input ─────────────────────────────────── */
     .hp-input {
       background-color: #1a1a1a;
       border: 1px solid #2a2a2a;
       color: #dddddd;
       border-radius: 6px;
-      padding: 12px 16px;
+      padding: 11px 16px;
       outline: none;
-      font-family: 'Fira Code', 'JetBrains Mono', monospace;
-      font-size: 15px;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 14px;
       width: 100%;
       text-align: center;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
     }
-    .hp-input:focus {
-      border-color: #444444;
-    }
+    .hp-input:focus { border-color: #444444; }
+    .hp-input::placeholder { color: #555555; }
+
+    /* ── Button ────────────────────────────────── */
     .hp-button {
       background-color: #1a1a1a;
       border: 1px solid #2a2a2a;
       color: #dddddd;
       border-radius: 6px;
-      padding: 9px 18px;
-      font-size: 14px;
+      padding: 8px 17px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      font-family: 'Fira Code', 'JetBrains Mono', monospace;
+      font-family: 'JetBrains Mono', Consolas, monospace;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       user-select: none;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
+      line-height: 1;
     }
     .hp-button:hover:not(:disabled) {
-      background-color: #222222;
+      background-color: #202020;
       border-color: #3a3a3a;
       color: #ffffff;
     }
-    .hp-button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
+    .hp-button:active:not(:disabled) { background-color: #181818; }
+    .hp-button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ── Copy inline button ────────────────────── */
+    .hp-copy-btn {
+      background: none;
+      border: none;
+      color: #aaaaaa;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      letter-spacing: 0.2px;
     }
+    .hp-copy-btn:hover { color: #dddddd; }
+
+    /* ── Textarea ──────────────────────────────── */
     .hp-textarea {
       background-color: #1a1a1a;
-      border: 1px solid #2a2a2a;
+      border: none;
       color: #dddddd;
-      border-radius: 6px;
-      padding: 16px;
+      border-radius: 0;
+      padding: 14px 16px;
       outline: none;
-      font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', monospace;
-      font-size: 14px;
-      line-height: 1.6;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.65;
       tab-size: 4;
       resize: vertical;
       width: 100%;
-      min-height: 520px;
-      letter-spacing: 0.2px;
+      min-height: 500px;
+      letter-spacing: 0.15px;
     }
-    .hp-textarea:focus {
-      border-color: #444444;
-    }
+    .hp-textarea::placeholder { color: #444444; }
     .hp-textarea:read-only {
       background-color: #161616;
-      color: #aaaaaa;
+      color: #888888;
       cursor: default;
     }
-    .card-container {
+
+    /* ── Card wrapper ──────────────────────────── */
+    .hp-card {
       background-color: #1a1a1a;
       border: 1px solid #2a2a2a;
       border-radius: 6px;
-      padding: 8px;
+      overflow: hidden;
+    }
+
+    /* ── Card toolbar (key label + copy) ───────── */
+    .hp-card-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 12px;
+      border-bottom: 1px solid #2a2a2a;
+      font-size: 11.5px;
+      color: #666666;
+      letter-spacing: 0.3px;
+    }
+    .hp-card-bar strong { color: #cccccc; font-weight: 500; }
+
+    /* ── Status text ───────────────────────────── */
+    .hp-status {
+      font-size: 12px;
+      color: #666666;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      letter-spacing: 0.2px;
     }
   </style>
 </head>
@@ -132,7 +184,35 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // Homepage Component
+    /* ── SVG Search Icon (magnifying glass) ─────────────────── */
+    function SearchIcon() {
+      return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round"
+             style={{ flexShrink: 0 }}>
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      );
+    }
+
+    /* ── SVG Copy Icon (standard clipboard icon, no emoji) ─── */
+    function CopyIcon() {
+      return (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round"
+             style={{ flexShrink: 0 }}>
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      );
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       Homepage
+    ───────────────────────────────────────────────────────── */
     function Homepage({ onSearch, onStickySearch }) {
       const [keyInput, setKeyInput] = useState('');
 
@@ -142,19 +222,21 @@
         onSearch(keyInput.trim());
       };
 
-      const handleStickySubmit = (e) => {
-        e.preventDefault();
+      const handleStickySubmit = () => {
         if (!keyInput.trim()) return;
         onStickySearch(keyInput.trim());
       };
 
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '110px', paddingLeft: '16px', paddingRight: '16px' }}>
-          <h1 className="hp-title" style={{ marginBottom: '36px' }}>
-            HIDDEN PAD
-          </h1>
+        <div style={{
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', paddingTop: '100px',
+          paddingLeft: '16px', paddingRight: '16px'
+        }}>
+          <h1 className="hp-title" style={{ marginBottom: '40px' }}>STICKY PAD</h1>
 
-          <form onSubmit={handleSearchSubmit} style={{ width: '100%', maxWidth: '440px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <form onSubmit={handleSearchSubmit}
+                style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <input
               type="text"
               id="key-input"
@@ -166,10 +248,9 @@
               spellCheck={false}
               autoComplete="off"
             />
-
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginTop: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
               <button type="submit" id="btn-search" className="hp-button">
-                🔍 Search
+                <SearchIcon /> Search
               </button>
               <button type="button" id="btn-sticky-search" onClick={handleStickySubmit} className="hp-button">
                 Sticky Search
@@ -180,202 +261,199 @@
       );
     }
 
-    // Search Editor Component (Normal Space)
+    /* ─────────────────────────────────────────────────────────
+       Search Editor  (normal namespace — fully editable)
+    ───────────────────────────────────────────────────────── */
     function SearchEditor({ docKey, initialContent, onSave, onExit }) {
-      const [content, setContent] = useState(initialContent || '');
-      const [copyText, setCopyText] = useState('Copy');
+      const [content, setContent]     = useState(initialContent || '');
+      const [copyLabel, setCopyLabel] = useState('Copy');
       const [saveStatus, setSaveStatus] = useState('');
 
+      /* Ctrl+S shortcut */
       useEffect(() => {
-        const handleKeyDown = (e) => {
+        const onKey = (e) => {
           if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
             e.preventDefault();
             handleSave();
           }
         };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
       }, [content]);
 
       const handleCopy = async () => {
         try {
           await navigator.clipboard.writeText(content);
-          setCopyText('Copied!');
-          setTimeout(() => setCopyText('Copy'), 2000);
-        } catch (err) {
-          console.error('Clipboard copy failed:', err);
-        }
+          setCopyLabel('Copied!');
+          setTimeout(() => setCopyLabel('Copy'), 2000);
+        } catch (err) { console.error('Copy failed', err); }
       };
 
       const handleSave = async () => {
         setSaveStatus('Saving...');
-        const success = await onSave(content);
-        if (success) {
-          setSaveStatus('Saved');
-          setTimeout(() => setSaveStatus(''), 2000);
-        } else {
-          setSaveStatus('Error saving');
-        }
+        const ok = await onSave(content);
+        if (ok) { setSaveStatus('Saved'); setTimeout(() => setSaveStatus(''), 2000); }
+        else     { setSaveStatus('Error saving'); }
       };
 
       const handleSaveAndExit = async () => {
         setSaveStatus('Saving...');
-        const success = await onSave(content);
-        if (success) {
-          onExit();
-        }
+        const ok = await onSave(content);
+        if (ok) onExit();
       };
 
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '32px', paddingBottom: '48px', paddingLeft: '16px', paddingRight: '16px', minHeight: '100vh' }}>
-          <h1 className="hp-title" style={{ fontSize: '18px', marginBottom: '24px' }}>
-            HIDDEN PAD
-          </h1>
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          paddingTop: '28px', paddingBottom: '48px',
+          paddingLeft: '16px', paddingRight: '16px', minHeight: '100vh'
+        }}>
+          <h1 className="hp-title--sm" style={{ marginBottom: '20px' }}>STICKY PAD</h1>
 
-          <div style={{ width: '100%', maxWidth: '920px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="card-container" style={{ position: 'relative' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px 10px 10px', borderBottom: '1px solid #2a2a2a', marginBottom: '8px', fontSize: '12px', color: '#888888' }}>
-                <span>SEARCH KEY: <strong style={{ color: '#dddddd', fontWeight: 600 }}>{docKey}</strong></span>
-                <button type="button" id="btn-copy" onClick={handleCopy} style={{ background: 'none', border: 'none', color: '#dddddd', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  📋 {copyText}
+          <div style={{ width: '100%', maxWidth: '940px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Card */}
+            <div className="hp-card">
+              {/* Toolbar */}
+              <div className="hp-card-bar">
+                <span>SEARCH &nbsp;<strong>{docKey}</strong></span>
+                <button className="hp-copy-btn" id="btn-copy" onClick={handleCopy}>
+                  <CopyIcon /> {copyLabel}
                 </button>
               </div>
-
+              {/* Textarea */}
               <textarea
                 id="search-editor-textarea"
+                className="hp-textarea"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Type code, notes, passwords, logs..."
-                className="hp-textarea"
-                style={{ border: 'none' }}
                 spellCheck={false}
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="button" id="btn-save" onClick={handleSave} className="hp-button">
-                  Save
-                </button>
-                <button type="button" id="btn-exit" onClick={onExit} className="hp-button">
-                  Exit
-                </button>
-                <button type="button" id="btn-save-exit" onClick={handleSaveAndExit} className="hp-button">
-                  Save & Exit
-                </button>
+            {/* Action row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button id="btn-save"      className="hp-button" onClick={handleSave}>Save</button>
+                <button id="btn-exit"      className="hp-button" onClick={onExit}>Exit</button>
+                <button id="btn-save-exit" className="hp-button" onClick={handleSaveAndExit}>Save &amp; Exit</button>
               </div>
-              {saveStatus && <span style={{ fontSize: '13px', color: '#888888' }}>{saveStatus}</span>}
+              {saveStatus && <span className="hp-status">{saveStatus}</span>}
             </div>
           </div>
         </div>
       );
     }
 
-    // Sticky Editor Component (Sticky Space)
-    function StickyEditor({ docKey, initialContent, isSticky: initialIsSticky, onStick, onExit }) {
-      const [content, setContent] = useState(initialContent || '');
-      const [isSticky, setIsSticky] = useState(initialIsSticky || false);
-      const [copyText, setCopyText] = useState('Copy');
+    /* ─────────────────────────────────────────────────────────
+       Sticky Editor  (sticky namespace — can be permanently locked)
+    ───────────────────────────────────────────────────────── */
+    function StickyEditor({ docKey, initialContent, isSticky: initSticky, onStick, onExit }) {
+      const [content, setContent]     = useState(initialContent || '');
+      const [isSticky, setIsSticky]   = useState(initSticky || false);
+      const [copyLabel, setCopyLabel] = useState('Copy');
       const [statusMsg, setStatusMsg] = useState('');
 
       const handleCopy = async () => {
         try {
           await navigator.clipboard.writeText(content);
-          setCopyText('Copied!');
-          setTimeout(() => setCopyText('Copy'), 2000);
-        } catch (err) {
-          console.error('Clipboard copy failed:', err);
-        }
+          setCopyLabel('Copied!');
+          setTimeout(() => setCopyLabel('Copy'), 2000);
+        } catch (err) { console.error('Copy failed', err); }
       };
 
       const handleStick = async () => {
         if (isSticky) return;
         setStatusMsg('Sticking...');
-        const success = await onStick(content);
-        if (success) {
-          setIsSticky(true);
-          setStatusMsg('Stuck (Read-Only)');
-        } else {
-          setStatusMsg('Error sticking');
-        }
+        const ok = await onStick(content);
+        if (ok) { setIsSticky(true); setStatusMsg('Stuck (Read-Only)'); }
+        else     { setStatusMsg('Error sticking'); }
       };
 
       const handleStickAndExit = async () => {
-        if (isSticky) {
-          onExit();
-          return;
-        }
         setStatusMsg('Sticking...');
-        const success = await onStick(content);
-        if (success) {
-          onExit();
-        }
+        const ok = await onStick(content);
+        if (ok) onExit();
       };
 
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '32px', paddingBottom: '48px', paddingLeft: '16px', paddingRight: '16px', minHeight: '100vh' }}>
-          <h1 className="hp-title" style={{ fontSize: '18px', marginBottom: '24px' }}>
-            HIDDEN PAD
-          </h1>
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          paddingTop: '28px', paddingBottom: '48px',
+          paddingLeft: '16px', paddingRight: '16px', minHeight: '100vh'
+        }}>
+          <h1 className="hp-title--sm" style={{ marginBottom: '20px' }}>STICKY PAD</h1>
 
-          <div style={{ width: '100%', maxWidth: '920px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="card-container" style={{ position: 'relative' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px 10px 10px', borderBottom: '1px solid #2a2a2a', marginBottom: '8px', fontSize: '12px', color: '#888888' }}>
-                <span>STICKY KEY: <strong style={{ color: '#dddddd', fontWeight: 600 }}>{docKey}</strong> {isSticky ? '(PERMANENT READ-ONLY)' : ''}</span>
-                <button type="button" id="btn-copy-sticky" onClick={handleCopy} style={{ background: 'none', border: 'none', color: '#dddddd', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  📋 {copyText}
+          <div style={{ width: '100%', maxWidth: '940px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Card */}
+            <div className="hp-card">
+              {/* Toolbar */}
+              <div className="hp-card-bar">
+                <span>
+                  STICKY &nbsp;<strong>{docKey}</strong>
+                  {isSticky && <span style={{ color: '#555555', marginLeft: '8px' }}>(PERMANENT READ-ONLY)</span>}
+                </span>
+                <button className="hp-copy-btn" id="btn-copy-sticky" onClick={handleCopy}>
+                  <CopyIcon /> {copyLabel}
                 </button>
               </div>
-
+              {/* Textarea */}
               <textarea
                 id="sticky-editor-textarea"
+                className="hp-textarea"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 readOnly={isSticky}
-                placeholder={isSticky ? 'Read-only content...' : 'Enter content to stick permanently...'}
-                className="hp-textarea"
-                style={{ border: 'none' }}
+                placeholder={isSticky ? '' : 'Enter content to stick permanently...'}
                 spellCheck={false}
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="button" id="btn-stick" onClick={handleStick} disabled={isSticky} className="hp-button">
-                  {isSticky ? 'Stuck' : 'Stick'}
-                </button>
-                <button type="button" id="btn-sticky-exit" onClick={onExit} className="hp-button">
-                  Exit
-                </button>
-                <button type="button" id="btn-stick-exit" onClick={handleStickAndExit} className="hp-button">
-                  {isSticky ? 'Exit' : 'Stick & Exit'}
-                </button>
-              </div>
-              {statusMsg && <span style={{ fontSize: '13px', color: '#888888' }}>{statusMsg}</span>}
+            {/* Action row — when already stuck, show ONE Exit button only */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              {isSticky ? (
+                /* ── READ-ONLY state: single Exit button ── */
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button id="btn-exit-sticky" className="hp-button" onClick={onExit}>Exit</button>
+                </div>
+              ) : (
+                /* ── EDIT state: Stick | Exit | Stick & Exit ── */
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button id="btn-stick"     className="hp-button" onClick={handleStick}>Stick</button>
+                  <button id="btn-exit-s"    className="hp-button" onClick={onExit}>Exit</button>
+                  <button id="btn-stick-exit" className="hp-button" onClick={handleStickAndExit}>Stick &amp; Exit</button>
+                </div>
+              )}
+              {statusMsg && <span className="hp-status">{statusMsg}</span>}
             </div>
           </div>
         </div>
       );
     }
 
-    // Main App Component
+    /* ─────────────────────────────────────────────────────────
+       Root App — state, routing, API calls
+    ───────────────────────────────────────────────────────── */
     function App() {
-      const [view, setView] = useState('home');
-      const [activeDoc, setActiveDoc] = useState({ key: '', mode: 'normal', content: '', isSticky: false, exists: false });
+      const [view, setView]       = useState('home');
+      const [activeDoc, setActiveDoc] = useState({
+        key: '', mode: 'normal', content: '', isSticky: false, exists: false
+      });
       const [loading, setLoading] = useState(false);
 
+      /* Fetch document from the correct namespace (/api/docs/<mode>/<key>) */
       const fetchDoc = async (key, mode) => {
         setLoading(true);
         try {
           const normKey = key.trim().toLowerCase();
-          const res = await fetch(`/api/docs/${encodeURIComponent(mode)}/${encodeURIComponent(normKey)}`);
+          const res  = await fetch(`/api/docs/${mode}/${encodeURIComponent(normKey)}`);
           const data = await res.json();
           setActiveDoc({
-            key: data.key,
-            mode: data.mode || mode,
-            content: data.content || '',
+            key:      data.key,
+            mode:     data.mode || mode,
+            content:  data.content || '',
             isSticky: Boolean(data.isSticky),
-            exists: Boolean(data.exists),
+            exists:   Boolean(data.exists),
           });
           return data;
         } catch (err) {
@@ -386,25 +464,25 @@
         }
       };
 
+      /* Save to the correct namespace */
       const saveDoc = async (content, mode, makeSticky = false) => {
         try {
-          const res = await fetch(`/api/docs/${encodeURIComponent(mode)}/${encodeURIComponent(activeDoc.key)}`, {
-            method: 'POST',
+          const res  = await fetch(`/api/docs/${mode}/${encodeURIComponent(activeDoc.key)}`, {
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content, isSticky: makeSticky })
+            body:    JSON.stringify({ content, isSticky: makeSticky }),
           });
           const data = await res.json();
           if (!res.ok) {
             alert(data.error || 'Cannot modify read-only sticky document');
             return false;
           }
-          setActiveDoc({
-            key: data.key,
-            mode: data.mode,
-            content: data.content,
+          setActiveDoc(prev => ({
+            ...prev,
+            content:  data.content,
             isSticky: Boolean(data.isSticky),
-            exists: true
-          });
+            exists:   true,
+          }));
           return true;
         } catch (err) {
           console.error('Save error:', err);
@@ -412,29 +490,19 @@
         }
       };
 
-      const handleSearch = async (key) => {
-        await fetchDoc(key, 'normal');
-        setView('search_editor');
-      };
-
-      const handleStickySearch = async (key) => {
-        await fetchDoc(key, 'sticky');
-        setView('sticky_editor');
-      };
-
-      const handleExit = () => {
+      const handleSearch       = async (key) => { await fetchDoc(key, 'normal'); setView('search_editor'); };
+      const handleStickySearch = async (key) => { await fetchDoc(key, 'sticky'); setView('sticky_editor'); };
+      const handleExit         = ()          => {
         setActiveDoc({ key: '', mode: 'normal', content: '', isSticky: false, exists: false });
         setView('home');
       };
 
-      if (loading) {
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-            <h1 className="hp-title" style={{ fontSize: '18px', marginBottom: '16px' }}>HIDDEN PAD</h1>
-            <p style={{ fontSize: '14px', color: '#888888' }}>Loading document...</p>
-          </div>
-        );
-      }
+      if (loading) return (
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh' }}>
+          <h1 className="hp-title--sm" style={{ marginBottom:'12px' }}>STICKY PAD</h1>
+          <span className="hp-status">Loading document...</span>
+        </div>
+      );
 
       return (
         <div>

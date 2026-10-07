@@ -1,8 +1,5 @@
 node_modules/
-backend/node_modules/
-frontend/node_modules/
-backend/data/*.json
-frontend/dist/
 .env
+data/
 *.log
 .DS_Store

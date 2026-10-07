@@ -1,65 +1,71 @@
 const http = require('http');
 
-function request(method, path, body) {
+function req(method, path, body) {
   return new Promise((resolve, reject) => {
     const postData = body ? JSON.stringify(body) : '';
-    const req = http.request(
-      {
-        hostname: 'localhost',
-        port: 5000,
-        path,
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData),
-        },
-      },
-      (res) => {
-        let data = '';
-        res.on('data', (chunk) => (data += chunk));
-        res.on('end', () => {
-          resolve({ status: res.statusCode, data: JSON.parse(data || '{}') });
-        });
-      }
-    );
-    req.on('error', reject);
-    if (postData) req.write(postData);
-    req.end();
+    const r = http.request({
+      hostname: 'localhost', port: 5000, path, method,
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) },
+    }, (res) => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => resolve({ status: res.statusCode, data: JSON.parse(d || '{}') }));
+    });
+    r.on('error', reject);
+    if (postData) r.write(postData);
+    r.end();
   });
 }
 
-async function runTests() {
-  console.log('--- Starting Dual Memory Independence Verification ---');
+async function run() {
+  let pass = 0, fail = 0;
+  const check = (label, got, expected) => {
+    const ok = got === expected;
+    console.log(`  ${ok ? '✓' : '✗'} ${label}: "${got}" ${ok ? '' : '(expected: "' + expected + '")'}`);
+    ok ? pass++ : fail++;
+  };
 
-  // Test 1: Save key "x" in normal Search mode
-  const t1 = await request('POST', '/api/docs/normal/x', { content: 'Normal Editable Content for Key X' });
-  console.log('1. POST /api/docs/normal/x ->', t1.data);
+  console.log('\n=== Case A: Same key in both systems ===');
+  await req('POST', '/api/docs/normal/test', { content: 'Normal Memory' });
+  await req('POST', '/api/docs/sticky/test', { content: 'Sticky Memory', isSticky: true });
+  const a1 = await req('GET', '/api/docs/normal/test');
+  const a2 = await req('GET', '/api/docs/sticky/test');
+  check('Search "test" content',        a1.data.content,  'Normal Memory');
+  check('Search "test" isSticky',       String(a1.data.isSticky), 'false');
+  check('Sticky "test" content',        a2.data.content,  'Sticky Memory');
+  check('Sticky "test" isSticky',       String(a2.data.isSticky), 'true');
 
-  // Test 2: Save key "x" in Sticky Search mode
-  const t2 = await request('POST', '/api/docs/sticky/x', { content: 'Sticky Read-Only Content for Key X', isSticky: true });
-  console.log('2. POST /api/docs/sticky/x ->', t2.data);
+  console.log('\n=== Case B: Different keys ===');
+  await req('POST', '/api/docs/normal/abc', { content: 'Normal ABC' });
+  await req('POST', '/api/docs/sticky/xyz', { content: 'Sticky XYZ', isSticky: true });
+  const b1 = await req('GET', '/api/docs/normal/abc');
+  const b2 = await req('GET', '/api/docs/sticky/xyz');
+  check('Search "abc" content',  b1.data.content, 'Normal ABC');
+  check('Sticky "xyz" content',  b2.data.content, 'Sticky XYZ');
 
-  // Test 3: Fetch normal mode for key "x" (verify independent)
-  const t3 = await request('GET', '/api/docs/normal/x');
-  console.log('3. GET /api/docs/normal/x ->', t3.data);
+  console.log('\n=== Case C: Sticky read-only enforcement ===');
+  const c1 = await req('POST', '/api/docs/sticky/test', { content: 'Try overwrite' });
+  check('Attempt to edit stuck doc returns 403', String(c1.status), '403');
 
-  // Test 4: Fetch sticky mode for key "x" (verify independent)
-  const t4 = await request('GET', '/api/docs/sticky/x');
-  console.log('4. GET /api/docs/sticky/x ->', t4.data);
+  console.log('\n=== Case D: Normal search UNAFFECTED by sticky ===');
+  const d1 = await req('GET', '/api/docs/normal/test');
+  check('Normal "test" still "Normal Memory"', d1.data.content, 'Normal Memory');
 
-  // Verification assertions
-  if (
-    t3.data.content === 'Normal Editable Content for Key X' &&
-    t4.data.content === 'Sticky Read-Only Content for Key X' &&
-    t3.data.isSticky === false &&
-    t4.data.isSticky === true
-  ) {
-    console.log('\nSUCCESS: Normal search memory and Sticky search memory for key "x" are completely independent!');
-  } else {
-    console.error('\nFAILURE: Memory spaces are not properly separated.');
-  }
+  console.log('\n=== Case E: Sticky write BEFORE sticking (editable) ===');
+  await req('POST', '/api/docs/sticky/draft', { content: 'Draft v1' });       // no isSticky
+  const e1 = await req('GET', '/api/docs/sticky/draft');
+  check('Sticky draft can be saved without locking', String(e1.data.isSticky), 'false');
+  await req('POST', '/api/docs/sticky/draft', { content: 'Draft v2' });       // update before stick
+  const e2 = await req('GET', '/api/docs/sticky/draft');
+  check('Sticky draft updated to Draft v2', e2.data.content, 'Draft v2');
+  await req('POST', '/api/docs/sticky/draft', { content: 'Final', isSticky: true }); // now stick
+  const e3 = await req('GET', '/api/docs/sticky/draft');
+  check('Sticky draft is now locked', String(e3.data.isSticky), 'true');
+  check('Sticky draft final content',  e3.data.content, 'Final');
 
-  console.log('--- All Dual Memory Verification Completed ---');
+  console.log(`\n════════════════════════════════`);
+  console.log(`  PASS: ${pass}   FAIL: ${fail}`);
+  console.log(`════════════════════════════════\n`);
 }
 
-runTests();
+run();

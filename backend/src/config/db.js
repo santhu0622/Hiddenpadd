@@ -58,8 +58,8 @@ class FallbackStore {
     const storeKey = `${normMode}:${normKey}`;
     const existing = this.data[storeKey];
 
-    // If existing sticky document, reject modification attempts
-    if (existing && existing.isSticky && !isSticky) {
+    // Block any modification to an already-stuck document (user cannot edit or update)
+    if (existing && existing.isSticky) {
       throw new Error('Document is permanently sticky and read-only');
     }
 

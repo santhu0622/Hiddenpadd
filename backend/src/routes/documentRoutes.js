@@ -58,14 +58,15 @@ async function handlePost(req, res) {
     if (!normKey) {
       return res.status(400).json({ error: 'Key is required' });
     }
-    const { content = '', isSticky = mode === 'sticky' } = req.body;
+    // Only lock permanently when client explicitly sends isSticky: true (user clicked Stick)
+    const { content = '', isSticky = false } = req.body;
 
     if (getIsMongoConnected()) {
       let doc = await Document.findOne({ key: normKey, mode });
 
       if (doc) {
-        // If document is already sticky, reject modification
-        if (doc.isSticky && !isSticky) {
+        // Block any modification to an already-stuck document
+        if (doc.isSticky) {
           return res.status(403).json({
             error: 'Document is permanently sticky and read-only. Modifications are not allowed.',
             doc: { key: doc.key, mode: doc.mode, content: doc.content, isSticky: true, exists: true }
@@ -82,7 +83,7 @@ async function handlePost(req, res) {
           key: normKey,
           mode,
           content,
-          isSticky: Boolean(isSticky || mode === 'sticky')
+          isSticky: Boolean(isSticky)
         });
       }
 
@@ -95,7 +96,7 @@ async function handlePost(req, res) {
       });
     } else {
       try {
-        const savedDoc = fallbackStore.set(normKey, mode, content, isSticky || mode === 'sticky');
+        const savedDoc = fallbackStore.set(normKey, mode, content, isSticky);
         return res.json({
           key: savedDoc.key,
           mode: savedDoc.mode,
