@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
+
+// Configure public DNS servers to resolve MongoDB SRV records reliably
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {
+  // Ignore if not allowed in specific environments
+}
 
 const isServerless = Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
 const DATA_DIR = isServerless ? path.join('/tmp', 'hiddenpad-data') : path.join(__dirname, '../../data');
