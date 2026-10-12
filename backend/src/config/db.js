@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '../../data');
+const isServerless = Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
+const DATA_DIR = isServerless ? path.join('/tmp', 'hiddenpad-data') : path.join(__dirname, '../../data');
 const DATA_FILE = path.join(DATA_DIR, 'documents.json');
 
 let useMongo = false;

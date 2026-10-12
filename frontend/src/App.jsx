@@ -7,6 +7,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'search_editor' | 'sticky_editor'
   const [activeDoc, setActiveDoc] = useState({
     key: '',
+    mode: 'normal',
     content: '',
     isSticky: false,
     exists: false,
@@ -14,19 +15,20 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Fetch document by key from API
-  const fetchDoc = async (key) => {
+  // Fetch document by key and mode from API
+  const fetchDoc = async (key, mode) => {
     setLoading(true);
     setErrorMsg('');
     try {
       const normKey = key.trim().toLowerCase();
-      const res = await fetch(`/api/docs/${encodeURIComponent(normKey)}`);
+      const res = await fetch(`/api/docs/${encodeURIComponent(mode)}/${encodeURIComponent(normKey)}`);
       if (!res.ok) {
         throw new Error('Failed to fetch document');
       }
       const data = await res.json();
       setActiveDoc({
         key: data.key,
+        mode: data.mode || mode,
         content: data.content || '',
         isSticky: Boolean(data.isSticky),
         exists: Boolean(data.exists),
@@ -34,9 +36,9 @@ export default function App() {
       return data;
     } catch (err) {
       console.error('API Error:', err);
-      // Fallback local memory state in case backend is offline
       setActiveDoc({
         key: key.trim().toLowerCase(),
+        mode,
         content: '',
         isSticky: false,
         exists: false,
@@ -48,9 +50,9 @@ export default function App() {
   };
 
   // Save / Stick document API
-  const saveDoc = async (content, makeSticky = false) => {
+  const saveDoc = async (content, mode, makeSticky = false) => {
     try {
-      const res = await fetch(`/api/docs/${encodeURIComponent(activeDoc.key)}`, {
+      const res = await fetch(`/api/docs/${encodeURIComponent(mode)}/${encodeURIComponent(activeDoc.key)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, isSticky: makeSticky }),
@@ -65,6 +67,7 @@ export default function App() {
       setActiveDoc((prev) => ({
         ...prev,
         content: data.content,
+        mode: data.mode,
         isSticky: Boolean(data.isSticky),
         exists: true,
       }));
@@ -78,19 +81,19 @@ export default function App() {
 
   // Homepage Search trigger
   const handleSearch = async (key) => {
-    const docData = await fetchDoc(key);
+    await fetchDoc(key, 'normal');
     setCurrentView('search_editor');
   };
 
   // Homepage Sticky Search trigger
   const handleStickySearch = async (key) => {
-    const docData = await fetchDoc(key);
+    await fetchDoc(key, 'sticky');
     setCurrentView('sticky_editor');
   };
 
   // Exit back to Homepage
   const handleExit = () => {
-    setActiveDoc({ key: '', content: '', isSticky: false, exists: false });
+    setActiveDoc({ key: '', mode: 'normal', content: '', isSticky: false, exists: false });
     setErrorMsg('');
     setCurrentView('home');
   };
@@ -98,7 +101,9 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#111111] text-[#dddddd] flex flex-col items-center justify-center font-mono">
-        <h1 className="text-xl font-bold tracking-wider mb-4">HIDDEN PAD</h1>
+        <h1 className="text-xl font-bold tracking-widest mb-4 text-[#eeeeee] uppercase" style={{ fontFamily: 'Space Mono, monospace' }}>
+          STICKY PAD
+        </h1>
         <p className="text-sm text-[#888888]">Loading document...</p>
       </div>
     );
@@ -124,7 +129,7 @@ export default function App() {
           docKey={activeDoc.key}
           initialContent={activeDoc.content}
           isSticky={activeDoc.isSticky}
-          onSave={(content, isSticky) => saveDoc(content, isSticky)}
+          onSave={(content) => saveDoc(content, 'normal', false)}
           onExit={handleExit}
         />
       )}
@@ -134,7 +139,7 @@ export default function App() {
           docKey={activeDoc.key}
           initialContent={activeDoc.content}
           isSticky={activeDoc.isSticky}
-          onStick={(content) => saveDoc(content, true)}
+          onStick={(content) => saveDoc(content, 'sticky', true)}
           onExit={handleExit}
         />
       )}
