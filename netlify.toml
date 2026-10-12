@@ -2,6 +2,9 @@
   command = "npm run build"
   publish = "backend/public"
 
+[build.environment]
+  MONGODB_URI = "mongodb+srv://santhoshreddyyarradla_db_user:stickypad123@sticky.eqhmwcn.mongodb.net/stickypad?retryWrites=true&w=majority&appName=sticky"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"

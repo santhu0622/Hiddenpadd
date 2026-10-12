@@ -6,3 +6,6 @@ services:
     buildCommand: npm run build
     startCommand: npm start
     healthCheckPath: /api/health
+    envVars:
+      - key: MONGODB_URI
+        value: mongodb+srv://santhoshreddyyarradla_db_user:stickypad123@sticky.eqhmwcn.mongodb.net/stickypad?retryWrites=true&w=majority&appName=sticky

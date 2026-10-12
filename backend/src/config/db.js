@@ -30,6 +30,7 @@ class FallbackStore {
 
   loadData() {
     try {
+      if (!fs.existsSync(DATA_FILE)) return {};
       const raw = fs.readFileSync(DATA_FILE, 'utf8');
       return JSON.parse(raw || '{}');
     } catch (err) {
@@ -42,7 +43,7 @@ class FallbackStore {
     try {
       fs.writeFileSync(DATA_FILE, JSON.stringify(this.data, null, 2), 'utf8');
     } catch (err) {
-      console.warn('Error saving fallback JSON store (might be read-only env):', err.message);
+      console.error('Error saving fallback JSON store:', err);
     }
   }
 
@@ -84,18 +85,20 @@ class FallbackStore {
 
 const fallbackStore = new FallbackStore();
 
+const DEFAULT_ATLAS_URI = 'mongodb+srv://santhoshreddyyarradla_db_user:stickypad123@sticky.eqhmwcn.mongodb.net/stickypad?retryWrites=true&w=majority&appName=sticky';
+
 const connectDB = async () => {
-  const mongoURI = process.env.MONGODB_URI;
-  if (!mongoURI) {
-    console.log('No MONGODB_URI configured. Using local JSON store fallback.');
-    useMongo = false;
+  if (mongoose.connection.readyState >= 1) {
+    useMongo = true;
     return;
   }
+
+  const mongoURI = process.env.MONGODB_URI || DEFAULT_ATLAS_URI;
   try {
     mongoose.set('strictQuery', false);
-    await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 3000 });
+    await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 8000 });
     useMongo = true;
-    console.log('Successfully connected to MongoDB database.');
+    console.log('Successfully connected to MongoDB Atlas database.');
   } catch (err) {
     console.warn('MongoDB connection failed. Using local JSON store fallback:', err.message);
     useMongo = false;
