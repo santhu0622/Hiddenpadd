@@ -84,14 +84,19 @@ class FallbackStore {
 const fallbackStore = new FallbackStore();
 
 const connectDB = async () => {
-  const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hiddenpad';
+  const mongoURI = process.env.MONGODB_URI;
+  if (!mongoURI) {
+    console.log('No MONGODB_URI configured. Using local JSON store fallback.');
+    useMongo = false;
+    return;
+  }
   try {
     mongoose.set('strictQuery', false);
-    await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 2000 });
+    await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 3000 });
     useMongo = true;
     console.log('Successfully connected to MongoDB database.');
   } catch (err) {
-    console.warn('MongoDB connection failed/unavailable. Using local JSON store fallback.');
+    console.warn('MongoDB connection failed. Using local JSON store fallback:', err.message);
     useMongo = false;
   }
 };

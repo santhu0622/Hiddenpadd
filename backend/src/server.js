@@ -22,7 +22,7 @@ app.use('/api/docs', documentRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'HIDDEN PAD API' });
+  res.json({ status: 'ok', service: 'STICKY PAD API' });
 });
 
 // Fallback to index.html for single-page app routes
@@ -32,7 +32,7 @@ app.get('*', (req, res) => {
 
 // Start Express server
 connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`HIDDEN PAD Express Web App running on http://localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`STICKY PAD Express Web App running on port ${PORT}`);
   });
 });
